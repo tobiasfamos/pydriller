@@ -226,6 +226,17 @@ class Modification:  # pylint: disable=R0902
             return True
         return self.__dict__ == other.__dict__
 
+    def _analyze_exec_statement_functions(self, function_list):
+        for func in function_list:
+            func.exec_statements = self._get_exec_statement_for_lines(func.start_line, func.end_line)
+
+    def _get_exec_statement_for_lines(self, start_line, end_line):
+        considered_lines = self.source_code.split("\n")[start_line - 1: end_line]
+        exec_statement = 0
+        for line in considered_lines:
+            exec_statement += line.count(";")
+        return exec_statement
+
 
 class Commit:
     """
