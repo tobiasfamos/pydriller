@@ -72,6 +72,7 @@ class Method:  # pylint: disable=R0902
         self.general_fan_out = func.general_fan_out
         self.length = func.length
         self.top_nesting_level = func.top_nesting_level
+        self.exec_statements = func.exec_statements
 
 
 class Modification:  # pylint: disable=R0902
@@ -210,10 +211,10 @@ class Modification:  # pylint: disable=R0902
             analysis = lizard.analyze_file.analyze_source_code(self.filename,
                                                                self.source_code
                                                                )
-
             self._nloc = analysis.nloc
             self._complexity = analysis.CCN
             self._token_count = analysis.token_count
+            self._analyze_exec_statement_functions(analysis.function_list)
 
             for func in analysis.function_list:
                 self._function_list.append(Method(func))
