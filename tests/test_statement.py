@@ -76,3 +76,8 @@ def test_method_statements_added_exiting_file(resource):
     assert modifications_c3[0].methods[4].statements_added == 0
     assert modifications_c3[0].methods[5].statements_added == 0
     assert modifications_c3[0].methods[6].statements_added == 0
+
+def test_method_statements_deleted_existing_file(resource):
+    modifications = resource.get_commit('e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2').modifications
+
+    assert modifications[0].methods[0].statements_deleted == 1
