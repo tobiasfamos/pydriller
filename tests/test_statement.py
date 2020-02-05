@@ -81,3 +81,83 @@ def test_method_statements_deleted_existing_file(resource):
     modifications = resource.get_commit('e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2').modifications
 
     assert modifications[0].methods[0].statements_deleted == 1
+
+def test_statement_overall():
+    git = GitRepository('test-repos/method-test/')
+    creation_modifcations = git.get_commit('6473c2c63ce09cda65bb11cf1f1bf12f31c185a2').modifications
+    assert creation_modifcations[0].methods[0].exec_statements == 3
+    assert creation_modifcations[0].methods[0].statements_added == 3
+    assert creation_modifcations[0].methods[0].statements_deleted == 0
+
+    assert creation_modifcations[0].methods[1].exec_statements == 3
+    assert creation_modifcations[0].methods[1].statements_added == 3
+    assert creation_modifcations[0].methods[1].statements_deleted == 0
+
+    assert creation_modifcations[0].methods[2].exec_statements == 3
+    assert creation_modifcations[0].methods[2].statements_added == 3
+    assert creation_modifcations[0].methods[2].statements_deleted == 0
+
+    one_statement_deleted_modification = git.get_commit('6b589757f66986981d1ef367304ae7f4371acd27').modifications
+    assert one_statement_deleted_modification[0].methods[0].exec_statements == 2
+    assert one_statement_deleted_modification[0].methods[0].statements_added == 0
+    assert one_statement_deleted_modification[0].methods[0].statements_deleted == 1
+
+    assert one_statement_deleted_modification[0].methods[1].exec_statements == 2
+    assert one_statement_deleted_modification[0].methods[1].statements_added == 0
+    assert one_statement_deleted_modification[0].methods[1].statements_deleted == 1
+
+    assert one_statement_deleted_modification[0].methods[2].exec_statements == 2
+    assert one_statement_deleted_modification[0].methods[2].statements_added == 0
+    assert one_statement_deleted_modification[0].methods[2].statements_deleted == 1
+
+    one_statement_added_modification = git.get_commit('2e533a7e1a0672ffd9f5c3b18dfadd4e34702bd1').modifications
+    assert one_statement_added_modification[0].methods[0].exec_statements == 3
+    assert one_statement_added_modification[0].methods[0].statements_added == 1
+    assert one_statement_added_modification[0].methods[0].statements_deleted == 0
+
+    assert one_statement_added_modification[0].methods[1].exec_statements == 3
+    assert one_statement_added_modification[0].methods[1].statements_added == 1
+    assert one_statement_added_modification[0].methods[1].statements_deleted == 0
+
+    assert one_statement_added_modification[0].methods[2].exec_statements == 3
+    assert one_statement_added_modification[0].methods[2].statements_added == 1
+    assert one_statement_added_modification[0].methods[2].statements_deleted == 0
+
+    one_added_one_deleted_modification = git.get_commit('af64155895273010b8e6cc793083a088c5fa45cb').modifications
+    assert one_added_one_deleted_modification[0].methods[0].exec_statements == 3
+    assert one_added_one_deleted_modification[0].methods[0].statements_added == 1
+    assert one_added_one_deleted_modification[0].methods[0].statements_deleted == 1
+
+    assert one_added_one_deleted_modification[0].methods[1].exec_statements == 3
+    assert one_added_one_deleted_modification[0].methods[1].statements_added == 1
+    assert one_added_one_deleted_modification[0].methods[1].statements_deleted == 1
+
+    assert one_added_one_deleted_modification[0].methods[2].exec_statements == 3
+    assert one_added_one_deleted_modification[0].methods[2].statements_added == 1
+    assert one_added_one_deleted_modification[0].methods[2].statements_deleted == 1
+
+    no_statement_added_modification = git.get_commit('fcd8f8eae9c6d249621271d14376dabdedf843bb').modifications
+    assert no_statement_added_modification[0].methods[0].exec_statements == 3
+    assert no_statement_added_modification[0].methods[0].statements_added == 0
+    assert no_statement_added_modification[0].methods[0].statements_deleted == 0
+
+    assert no_statement_added_modification[0].methods[1].exec_statements == 3
+    assert no_statement_added_modification[0].methods[1].statements_added == 0
+    assert no_statement_added_modification[0].methods[1].statements_deleted == 0
+
+    assert no_statement_added_modification[0].methods[2].exec_statements == 3
+    assert no_statement_added_modification[0].methods[2].statements_added == 0
+    assert no_statement_added_modification[0].methods[2].statements_deleted == 0
+
+    one_added_one_deleted_modification_2 = git.get_commit('c155c3ee786f40dca1f4e9c59ab989d0b252df80').modifications
+    assert one_added_one_deleted_modification_2[0].methods[0].exec_statements == 3
+    assert one_added_one_deleted_modification_2[0].methods[0].statements_added == 1
+    assert one_added_one_deleted_modification_2[0].methods[0].statements_deleted == 1
+
+    assert one_added_one_deleted_modification_2[0].methods[1].exec_statements == 3
+    assert one_added_one_deleted_modification_2[0].methods[1].statements_added == 1
+    assert one_added_one_deleted_modification_2[0].methods[1].statements_deleted == 1
+
+    assert one_added_one_deleted_modification_2[0].methods[2].exec_statements == 3
+    assert one_added_one_deleted_modification_2[0].methods[2].statements_added == 1
+    assert one_added_one_deleted_modification_2[0].methods[2].statements_deleted == 1
