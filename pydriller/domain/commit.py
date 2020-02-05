@@ -27,7 +27,7 @@ import lizard
 from git import Diff, Git, Commit as GitCommit, NULL_TREE
 
 from pydriller.domain.developer import Developer
-from pydriller.utils.DiffParser import parse_diff_added, parse_diff_deleted
+from pydriller.utils.DiffParser import get_changed_lines_between
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +243,7 @@ class Modification:  # pylint: disable=R0902
         return exec_statement
 
     def _get_added_statement_for_lines(self, start_line, end_line):
-        line_list = parse_diff_added(self.diff, start_line, end_line)
+        line_list = get_changed_lines_between(self.diff, start_line, end_line)
         statements_added = 0
         for line in line_list:
             if line[1] and line[1][0] == "+":
@@ -251,12 +251,12 @@ class Modification:  # pylint: disable=R0902
         return statements_added
 
     def _get_deleted_statement_for_lines(self, start_line, end_line):
-        line_list = parse_diff_deleted(self.diff, start_line, end_line)
-        statements_added = 0
+        line_list = get_changed_lines_between(self.diff, start_line, end_line)
+        statements_deleted = 0
         for line in line_list:
             if line[1] and line[1][0] == "-":
-                statements_added += line[1].count(";")
-        return statements_added
+                statements_deleted += line[1].count(";")
+        return statements_deleted
 
 
 class Commit:
