@@ -27,6 +27,7 @@ import lizard
 from git import Diff, Git, Commit as GitCommit, NULL_TREE
 
 from pydriller.domain.developer import Developer
+from pydriller.utils.DiffParser import parse_diff_added
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ class Method:  # pylint: disable=R0902
         self.length = func.length
         self.top_nesting_level = func.top_nesting_level
         self.exec_statements = func.exec_statements
+        self.statements_added= func.add_statements
 
 
 class Modification:  # pylint: disable=R0902
@@ -229,6 +231,7 @@ class Modification:  # pylint: disable=R0902
     def _analyze_exec_statement_functions(self, function_list):
         for func in function_list:
             func.exec_statements = self._get_exec_statement_for_lines(func.start_line, func.end_line)
+            func.add_statements = self._get_added_statement_for_lines(func.start_line, func.end_line)
 
     def _get_exec_statement_for_lines(self, start_line, end_line):
         considered_lines = self.source_code.split("\n")[start_line - 1: end_line]
@@ -236,6 +239,14 @@ class Modification:  # pylint: disable=R0902
         for line in considered_lines:
             exec_statement += line.count(";")
         return exec_statement
+
+    def _get_added_statement_for_lines(self, start_line, end_line):
+        line_list = parse_diff_added(self.diff, start_line, end_line)
+        statements_added = 0
+        for line in line_list:
+            if line[1] and line[1][0] == "+":
+                statements_added += line[1].count(";")
+        return statements_added
 
 
 class Commit:
