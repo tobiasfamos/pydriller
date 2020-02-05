@@ -14,9 +14,8 @@
 
 import logging
 
-
 logging.basicConfig(
-  format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 import pytest
 from pydriller.git_repository import GitRepository
@@ -27,7 +26,7 @@ def resource():
     yield GitRepository('test-repos/git-1/')
 
 
-def test_method_stmt_added(resource):
+def test_method_exec_statements(resource):
     modifications_c1 = resource.get_commit('866e997a9e44cb4ddd9e00efe49361420aff2559').modifications
     modifications_c2 = resource.get_commit('8b1757781e2e05c22fad91566e4f2653453dc934').modifications
 
@@ -45,3 +44,35 @@ def test_method_stmt_added(resource):
     assert modifications_c2[0].methods[3].exec_statements == 1
     assert modifications_c2[0].methods[4].exec_statements == 1
     assert modifications_c2[0].methods[5].exec_statements == 2
+
+
+def test_method_statements_added_new_file(resource):
+    modifications_c1 = resource.get_commit('866e997a9e44cb4ddd9e00efe49361420aff2559').modifications
+    modifications_c2 = resource.get_commit('8b1757781e2e05c22fad91566e4f2653453dc934').modifications
+
+    assert modifications_c1[0].methods[0].statements_added == 0
+    assert modifications_c1[0].methods[1].statements_added == 4
+    assert modifications_c1[0].methods[2].statements_added == 1
+    assert modifications_c1[0].methods[3].statements_added == 1
+    assert modifications_c1[0].methods[4].statements_added == 1
+    assert modifications_c1[0].methods[5].statements_added == 1
+    assert modifications_c1[0].methods[6].statements_added == 1
+
+    assert modifications_c2[0].methods[0].statements_added == 0
+    assert modifications_c2[0].methods[1].statements_added == 2
+    assert modifications_c2[0].methods[2].statements_added == 1
+    assert modifications_c2[0].methods[3].statements_added == 1
+    assert modifications_c2[0].methods[4].statements_added == 1
+    assert modifications_c2[0].methods[5].statements_added == 2
+
+
+def test_method_statements_added_exiting_file(resource):
+    modifications_c3 = resource.get_commit('57dbd017d1a744b949e7ca0b1c1a3b3dd4c1cbc1').modifications
+
+    assert modifications_c3[0].methods[0].statements_added == 0
+    assert modifications_c3[0].methods[1].statements_added == 0
+    assert modifications_c3[0].methods[2].statements_added == 1
+    assert modifications_c3[0].methods[3].statements_added == 0
+    assert modifications_c3[0].methods[4].statements_added == 0
+    assert modifications_c3[0].methods[5].statements_added == 0
+    assert modifications_c3[0].methods[6].statements_added == 0
