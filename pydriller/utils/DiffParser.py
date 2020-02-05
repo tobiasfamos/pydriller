@@ -10,6 +10,19 @@ def parse_diff_added(diff, start_line, end_line):
         line_count += 1
     return line_list
 
+def parse_diff_deleted(diff, start_line, end_line):
+    hunk_string = diff.split("@@")[1]
+    hunk = Hunk.create_from_string(hunk_string)
+    diff_split_by_lines = diff.split("\n")
+    line_count = hunk.from_before - 1
+    line_list = []
+    for line in diff_split_by_lines:
+        if line and line[0] == "-":
+            if start_line <= line_count <= end_line:
+                line_list.append([line_count, line])
+            line_count -= 1
+        line_count += 1
+    return line_list
 
 class Hunk:
     def __init__(self, from_before, no_lines_before, from_after, no_lines_after):
