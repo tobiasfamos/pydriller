@@ -7,24 +7,30 @@ from pydriller.metrics.process.method_statement_count import MethodStatementCoun
 TEST_DATA_SIMPLE = [
     ('test-repos/method-test', None, 'c155c3ee786f40dca1f4e9c59ab989d0b252df80', "Foo.java:Foo::someFunction()",
      {"sum_statement_added": 6,
-      "max_statement_added": 3}),
+      "max_statement_added": 3,
+      "average_statement_added": 1.2}),
     ('test-repos/method-test', None, 'c155c3ee786f40dca1f4e9c59ab989d0b252df80', "Foo.java:Foo::someFunction2()",
      {"sum_statement_added": 6,
-      "max_statement_added": 3}),
+      "max_statement_added": 3,
+      "average_statement_added": 1.2}),
     ('test-repos/method-test', None, 'c155c3ee786f40dca1f4e9c59ab989d0b252df80', "Foo.java:Foo::someFunction3()",
      {"sum_statement_added": 6,
-      "max_statement_added": 3})]
+      "max_statement_added": 3,
+      "average_statement_added": 1.2})]
 
 TEST_DATA_RENAME = [
     ('test-repos/method-test2', None, "62339f6ae6cfea5b06c54dee1479b9d884afe260", "Bar.java:Foo::someFunction()",
      {"sum_statement_added": 4,
-      "max_statement_added": 3}),
+      "max_statement_added": 3,
+      "average_statement_added": 1}),
     ('test-repos/method-test2', None, "62339f6ae6cfea5b06c54dee1479b9d884afe260", "Bar.java:Foo::someFunction2()",
      {"sum_statement_added": 4,
-      "max_statement_added": 3}),
+      "max_statement_added": 3,
+      "average_statement_added": 1}),
     ('test-repos/method-test2', None, "62339f6ae6cfea5b06c54dee1479b9d884afe260", "Bar.java:Foo::someFunction3()",
      {"sum_statement_added": 4,
-      "max_statement_added": 3})
+      "max_statement_added": 3,
+      "average_statement_added": 1})
 ]
 
 
