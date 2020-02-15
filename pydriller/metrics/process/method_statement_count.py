@@ -5,7 +5,7 @@ from pydriller.metrics.process.process_metric import ProcessMetric
 SUM_ADDED = "sum_statement_added"
 MAX_ADDED = "max_statement_added"
 AVG_ADDED = "average_statement_added"
-NUM_MODIFIED = "number_modified"
+NUM_MODIFIED = "method_histories"
 SUM_DELETED = "sum_statement_deleted"
 MAX_DELETED = "max_statement_deleted"
 AVG_DELETED = "average_statement_deleted"
@@ -76,6 +76,7 @@ class MethodStatementCount(ProcessMetric):
                 MAX_ADDED: methods[method_name][MAX_ADDED],
                 SUM_DELETED: methods[method_name][SUM_DELETED],
                 MAX_DELETED: methods[method_name][MAX_DELETED],
-                AVG_DELETED: methods[method_name][AVG_DELETED]
+                AVG_DELETED: methods[method_name][AVG_DELETED],
+                NUM_MODIFIED: methods[method_name][NUM_MODIFIED]
             }
         return metrics
