@@ -7,6 +7,10 @@ from pydriller.repository_mining import RepositoryMining
 from pydriller.metrics.process.process_metric import ProcessMetric
 
 
+def generate_method_long_name(file_name, method_long_name):
+    return file_name + ":" + method_long_name
+
+
 class MethodStatementCount(ProcessMetric):
 
     def count(self):
@@ -20,9 +24,17 @@ class MethodStatementCount(ProcessMetric):
 
             for modified_file in commit.modifications:
 
+                file_path = renamed_files.get(modified_file.new_path, modified_file.new_path)
+
+                if modified_file.change_type == ModificationType.RENAME:
+                    renamed_files[modified_file.old_path] = file_path
+
+                file_name = file_path.split("/")[-1]
+
                 for method in modified_file.methods:
-                    method_name = method.filename + ":" + method.long_name
+                    method_name = generate_method_long_name(file_name, method.long_name)
                     previous_added = methods.get(method_name, {"sum_statement_added": 0})
-                    previous_added["sum_statement_added"] = previous_added["sum_statement_added"] + method.statements_added
+                    previous_added["sum_statement_added"] = previous_added[
+                                                                "sum_statement_added"] + method.statements_added
                     methods[method_name] = previous_added
         return methods
