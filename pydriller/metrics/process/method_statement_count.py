@@ -6,6 +6,9 @@ from pydriller.domain.commit import ModificationType
 from pydriller.repository_mining import RepositoryMining
 from pydriller.metrics.process.process_metric import ProcessMetric
 
+SUM_ADDED = "sum_statement_added"
+MAX_ADDED = "max_statement_added"
+
 
 def generate_method_long_name(file_name, method_long_name):
     return file_name + ":" + method_long_name
@@ -33,8 +36,10 @@ class MethodStatementCount(ProcessMetric):
 
                 for method in modified_file.methods:
                     method_name = generate_method_long_name(file_name, method.long_name)
-                    previous_added = methods.get(method_name, {"sum_statement_added": 0})
-                    previous_added["sum_statement_added"] = previous_added[
-                                                                "sum_statement_added"] + method.statements_added
+                    previous_added = methods.get(method_name, {SUM_ADDED: 0, MAX_ADDED: 0})
+                    previous_added[SUM_ADDED] = previous_added[
+                                                    SUM_ADDED] + method.statements_added
+                    if previous_added[MAX_ADDED] < method.statements_added:
+                        previous_added[MAX_ADDED] = method.statements_added
                     methods[method_name] = previous_added
         return methods
