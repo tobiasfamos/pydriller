@@ -10,6 +10,8 @@ SUM_DELETED = "sum_statement_deleted"
 MAX_DELETED = "max_statement_deleted"
 AVG_DELETED = "average_statement_deleted"
 CHURN = "churn"
+AVG_CHURN = "average_churn"
+MAX_CHURN = "max_churn"
 
 
 class MethodStatementCount(ProcessMetric):
@@ -49,11 +51,13 @@ class MethodStatementCount(ProcessMetric):
             metrics[MAX_DELETED] = method.statements_deleted
         if method.statements_added or method.statements_deleted:
             metrics[NUM_MODIFIED] += 1
+        if method.statements_added - method.statements_deleted > metrics[MAX_CHURN]:
+            metrics[MAX_CHURN] = method.statements_added - method.statements_deleted
         return metrics
 
     @staticmethod
     def __generate_empty_metrics():
-        return {SUM_ADDED: 0, MAX_ADDED: 0, NUM_MODIFIED: 0, SUM_DELETED: 0, MAX_DELETED: 0}
+        return {SUM_ADDED: 0, MAX_ADDED: 0, NUM_MODIFIED: 0, SUM_DELETED: 0, MAX_DELETED: 0, MAX_CHURN: 0}
 
     @staticmethod
     def __generate_method_long_name(file_name, method_long_name):
@@ -64,6 +68,7 @@ class MethodStatementCount(ProcessMetric):
         for method in methods.values():
             method[AVG_ADDED] = method[SUM_ADDED] / method[NUM_MODIFIED]
             method[AVG_DELETED] = method[SUM_DELETED] / method[NUM_MODIFIED]
+            method[AVG_CHURN] = method[CHURN] / method[NUM_MODIFIED]
         return methods
 
     @staticmethod
@@ -81,7 +86,9 @@ class MethodStatementCount(ProcessMetric):
                 MAX_ADDED: methods[method_name][MAX_ADDED],
                 SUM_DELETED: methods[method_name][SUM_DELETED],
                 MAX_DELETED: methods[method_name][MAX_DELETED],
-                NUM_MODIFIED: methods[method_name][NUM_MODIFIED]
+                NUM_MODIFIED: methods[method_name][NUM_MODIFIED],
+                MAX_CHURN: methods[method_name][MAX_CHURN]
+
             }
         metrics = MethodStatementCount.__add_absolutes(metrics)
         metrics = MethodStatementCount.__add_averages(metrics)
