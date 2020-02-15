@@ -8,6 +8,7 @@ AVG_ADDED = "average_statement_added"
 NUM_MODIFIED = "number_modified"
 SUM_DELETED = "sum_statement_deleted"
 MAX_DELETED = "max_statement_deleted"
+AVG_DELETED = "average_statement_deleted"
 
 
 class MethodStatementCount(ProcessMetric):
@@ -62,6 +63,7 @@ class MethodStatementCount(ProcessMetric):
     def __add_avg_statement_added(methods):
         for method in methods.values():
             method[AVG_ADDED] = method[SUM_ADDED] / method[NUM_MODIFIED]
+            method[AVG_DELETED] = method[SUM_DELETED] / method[NUM_MODIFIED]
         return methods
 
     @staticmethod
@@ -73,6 +75,7 @@ class MethodStatementCount(ProcessMetric):
                 AVG_ADDED: methods[method_name][AVG_ADDED],
                 MAX_ADDED: methods[method_name][MAX_ADDED],
                 SUM_DELETED: methods[method_name][SUM_DELETED],
-                MAX_DELETED: methods[method_name][MAX_DELETED]
+                MAX_DELETED: methods[method_name][MAX_DELETED],
+                AVG_DELETED: methods[method_name][AVG_DELETED]
             }
         return metrics
