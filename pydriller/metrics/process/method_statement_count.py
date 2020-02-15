@@ -9,6 +9,7 @@ NUM_MODIFIED = "method_histories"
 SUM_DELETED = "sum_statement_deleted"
 MAX_DELETED = "max_statement_deleted"
 AVG_DELETED = "average_statement_deleted"
+CHURN = "churn"
 
 
 class MethodStatementCount(ProcessMetric):
@@ -36,7 +37,6 @@ class MethodStatementCount(ProcessMetric):
                     previous_added = methods.get(method_name, MethodStatementCount.__generate_empty_metrics())
                     previous_added = MethodStatementCount.__update_metrics(previous_added, method)
                     methods[method_name] = previous_added
-        methods = MethodStatementCount.__add_avg_statement_added(methods)
         return MethodStatementCount.__create_return_metrics(methods)
 
     @staticmethod
@@ -60,10 +60,16 @@ class MethodStatementCount(ProcessMetric):
         return file_name + ":" + method_long_name
 
     @staticmethod
-    def __add_avg_statement_added(methods):
+    def __add_averages(methods):
         for method in methods.values():
             method[AVG_ADDED] = method[SUM_ADDED] / method[NUM_MODIFIED]
             method[AVG_DELETED] = method[SUM_DELETED] / method[NUM_MODIFIED]
+        return methods
+
+    @staticmethod
+    def __add_absolutes(methods):
+        for method in methods.values():
+            method[CHURN] = method[SUM_ADDED] - method[SUM_DELETED]
         return methods
 
     @staticmethod
@@ -72,11 +78,11 @@ class MethodStatementCount(ProcessMetric):
         for method_name in methods:
             metrics[method_name] = {
                 SUM_ADDED: methods[method_name][SUM_ADDED],
-                AVG_ADDED: methods[method_name][AVG_ADDED],
                 MAX_ADDED: methods[method_name][MAX_ADDED],
                 SUM_DELETED: methods[method_name][SUM_DELETED],
                 MAX_DELETED: methods[method_name][MAX_DELETED],
-                AVG_DELETED: methods[method_name][AVG_DELETED],
                 NUM_MODIFIED: methods[method_name][NUM_MODIFIED]
             }
+        metrics = MethodStatementCount.__add_absolutes(metrics)
+        metrics = MethodStatementCount.__add_averages(metrics)
         return metrics
