@@ -1,7 +1,3 @@
-"""
-Module that calculates the number of commits made to a file.
-"""
-
 from pydriller.domain.commit import ModificationType
 from pydriller.repository_mining import RepositoryMining
 from pydriller.metrics.process.process_metric import ProcessMetric
@@ -10,7 +6,7 @@ SUM_ADDED = "sum_statement_added"
 MAX_ADDED = "max_statement_added"
 AVG_ADDED = "average_statement_added"
 NUM_MODIFIED = "number_modified"
-
+SUM_DELETED = "sum_statement_deleted"
 
 class MethodStatementCount(ProcessMetric):
 
@@ -43,8 +39,8 @@ class MethodStatementCount(ProcessMetric):
 
     @staticmethod
     def __update_metrics(metrics, method):
-        metrics[SUM_ADDED] = metrics[
-                                 SUM_ADDED] + method.statements_added
+        metrics[SUM_ADDED] = metrics[SUM_ADDED] + method.statements_added
+        metrics[SUM_DELETED] = metrics[SUM_DELETED] + method.statements_deleted
         if metrics[MAX_ADDED] < method.statements_added:
             metrics[MAX_ADDED] = method.statements_added
         if method.statements_added or method.statements_deleted:
@@ -53,7 +49,7 @@ class MethodStatementCount(ProcessMetric):
 
     @staticmethod
     def __generate_empty_metrics():
-        return {SUM_ADDED: 0, MAX_ADDED: 0, NUM_MODIFIED: 0}
+        return {SUM_ADDED: 0, MAX_ADDED: 0, NUM_MODIFIED: 0, SUM_DELETED: 0}
 
     @staticmethod
     def __generate_method_long_name(file_name, method_long_name):
@@ -73,5 +69,6 @@ class MethodStatementCount(ProcessMetric):
                 SUM_ADDED: methods[method_name][SUM_ADDED],
                 AVG_ADDED: methods[method_name][AVG_ADDED],
                 MAX_ADDED: methods[method_name][MAX_ADDED],
+                SUM_DELETED: methods[method_name][SUM_DELETED],
             }
         return metrics
