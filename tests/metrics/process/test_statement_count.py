@@ -10,7 +10,13 @@ TEST_DATA = [
     ('test-repos/method-test', None, 'c155c3ee786f40dca1f4e9c59ab989d0b252df80', "Foo.java:Foo::someFunction2()",
      {"sum_statement_added": 6}),
     ('test-repos/method-test', None, 'c155c3ee786f40dca1f4e9c59ab989d0b252df80', "Foo.java:Foo::someFunction3()",
-     {"sum_statement_added": 6})
+     {"sum_statement_added": 6}),
+    ('test-repos/method-test', None, None, "Bar.java:Foo::someFunction()",
+     {"sum_statement_added": 4}),
+    ('test-repos/method-test', None, None, "Bar.java:Foo::someFunction2()",
+     {"sum_statement_added": 4}),
+    ('test-repos/method-test', None, None, "Bar.java:Foo::someFunction3()",
+     {"sum_statement_added": 4})
 ]
 
 
