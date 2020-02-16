@@ -1,6 +1,7 @@
 from pydriller import RepositoryMining
 from pydriller.domain.commit import ModificationType
 from pydriller.metrics.process.process_metric import ProcessMetric
+from pydriller.utils.NameGenerator import generate_method_long_name
 
 
 class MethodAuthorCount(ProcessMetric):
@@ -25,9 +26,9 @@ class MethodAuthorCount(ProcessMetric):
 
                 for method in modified_file.methods:
                     if method.statements_deleted or method.statements_added:
-                        method_long_name_with_file = file_name + ":" + method.long_name
-                        MethodAuthorCount.__add_author_to_method_list(methods, commit.author, method_long_name_with_file)
-
+                        method_long_name_with_file = generate_method_long_name(file_name, method.long_name)
+                        MethodAuthorCount.__add_author_to_method_list(methods, commit.author,
+                                                                      method_long_name_with_file)
 
         return MethodAuthorCount.__create_return_metrics(methods)
 
@@ -38,11 +39,8 @@ class MethodAuthorCount(ProcessMetric):
             metrics[method_long_name] = len(methods[method_long_name])
         return metrics
 
-
     @staticmethod
     def __add_author_to_method_list(methods, author, method_long_name_with_file):
         method = methods.get(method_long_name_with_file, set())
         method.add(author)
         methods[method_long_name_with_file] = method
-
-
