@@ -6,30 +6,78 @@ TEST_DATA = [
     (
         'test-repos/method-test5', None, None,
         "Foo.java:Foo::noConditionInMethod()", {
-            "condition_changes": 0
+            "condition_changes": 0,
+            "else_added": 0,
+            "else_removed": 0
         }),
     ('test-repos/method-test5', None, None, "Foo.java:Foo::neverAConditionChange()",
      {
-         "condition_changes": 1
+         "condition_changes": 1,
+         "else_added": 0,
+         "else_removed": 0
      }),
     (
         'test-repos/method-test5', None, None,
         "Foo.java:Foo::conditionChangedOnce()",
         {
-            "condition_changes": 2
+            "condition_changes": 3,
+            "else_added": 0,
+            "else_removed": 0
         }),
     ('test-repos/method-test5', None, None,
      "Foo.java:Foo::conditionChangedTwice()", {
-         "condition_changes": 3
+         "condition_changes": 5,
+         "else_added": 0,
+         "else_removed": 0
      }),
     ('test-repos/method-test5', None, None,
      "Foo.java:Foo::twoDifferentConditionStatementsAdded()", {
-         "condition_changes": 2
+         "condition_changes": 2,
+         "else_added": 0,
+         "else_removed": 0
      }),
     ('test-repos/method-test5', None, None,
      "Foo.java:Foo::oneConditionAddedAndRemovedAfter()", {
-         "condition_changes": 2
-     })
+         "condition_changes": 2,
+         "else_added": 1,
+         "else_removed": 1
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::oneElseNeverChanged()", {
+         "condition_changes": 1,
+         "else_added": 1,
+         "else_removed": 0
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::oneDeletedAfter()", {
+         "condition_changes": 1,
+         "else_added": 1,
+         "else_removed": 1
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::twoElseOneDeleted()", {
+         "condition_changes": 2,
+         "else_added": 2,
+         "else_removed": 1
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::fourElseAddedNoDeleted()", {
+         "condition_changes": 4,
+         "else_added": 4,
+         "else_removed": 0
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::fourElseAddedAndDeleted()", {
+         "condition_changes": 7,
+         "else_added": 4,
+         "else_removed": 4
+     }),
+    ('test-repos/method-test5', None, None,
+     "Foo.java:Foo::twoElseIfAddedOneDeleted( int a)", {
+         "condition_changes": 4,
+         "else_added": 2,
+         "else_removed": 1
+     }),
 ]
 
 
