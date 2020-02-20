@@ -78,6 +78,7 @@ class Method:  # pylint: disable=R0902
         self.statements_added = func.add_statements
         self.statements_deleted = func.del_statements
         self.comment_to_code_ration = func.comment_to_code
+        self.path_count = func.path_count
 
 
 class Modification:  # pylint: disable=R0902
@@ -221,6 +222,7 @@ class Modification:  # pylint: disable=R0902
             self._token_count = analysis.token_count
             self._analyze_exec_statement_functions(analysis.function_list)
             self._analyze_comment(analysis.function_list)
+            self._analyze_path(analysis.function_list)
 
             for func in analysis.function_list:
                 self._function_list.append(Method(func))
@@ -285,6 +287,18 @@ class Modification:  # pylint: disable=R0902
                 current_multi_line_comment = not current_multi_line_comment
         return lines_of_comment / lines_of_code
 
+    def _analyze_path(self, function_list):
+        for func in function_list:
+            code = ""
+            line_list = get_lines_between(self.source_code, func.start_line, func.end_line)
+            for line in line_list:
+                code += line + " "
+
+            if_statements = re.findall("\sif\s?\(", code)
+            while_statements = re.findall("\swhile\s*", code)
+            for_statements = re.findall("\\sfor\\s*", code)
+            case_statements = re.findall("\scase\s*", code)
+            func.path_count = len(if_statements) + len(while_statements) + len(for_statements) + len(case_statements)
 
 class Commit:
     """
