@@ -27,7 +27,8 @@ def get_hunks_and_diffs(diff):
         hunk_diff_list.append([hunks[i], diffs[i]])
     return hunk_diff_list
 
-
+def get_lines_between(source_code, start_line, end_line):
+    return source_code.split("\n")[start_line-1:end_line]
 
 class Hunk:
     def __init__(self, from_before, no_lines_before, from_after, no_lines_after):
