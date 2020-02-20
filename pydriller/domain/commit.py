@@ -18,6 +18,7 @@ Commit, Modification,
 ModificationType and Method.
 """
 import logging
+import re
 from _datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -27,7 +28,7 @@ import lizard
 from git import Diff, Git, Commit as GitCommit, NULL_TREE
 
 from pydriller.domain.developer import Developer
-from pydriller.utils.DiffParser import get_changed_lines_between
+from pydriller.utils.DiffParser import get_changed_lines_between, get_lines_between
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ class Method:  # pylint: disable=R0902
         self.exec_statements = func.exec_statements
         self.statements_added = func.add_statements
         self.statements_deleted = func.del_statements
+        self.comment_to_code_ration = func.comment_to_code
 
 
 class Modification:  # pylint: disable=R0902
@@ -218,6 +220,7 @@ class Modification:  # pylint: disable=R0902
             self._complexity = analysis.CCN
             self._token_count = analysis.token_count
             self._analyze_exec_statement_functions(analysis.function_list)
+            self._analyze_comment(analysis.function_list)
 
             for func in analysis.function_list:
                 self._function_list.append(Method(func))
@@ -257,6 +260,30 @@ class Modification:  # pylint: disable=R0902
             if line[1] and line[1][0] == "-":
                 statements_deleted += line[1].count(";")
         return statements_deleted
+
+    def _analyze_comment(self, function_list):
+        for func in function_list:
+            func.comment_to_code = self._get_comment_to_code_ratio(func.start_line, func.end_line)
+
+    def _get_comment_to_code_ratio(self, start_line, end_line):
+        line_list = get_lines_between(self.source_code, start_line, end_line)
+        lines_of_code = 0
+        lines_of_comment = 0
+        for line in line_list:
+            if re.findall("//", line):
+                lines_of_comment += 1
+            else:
+                lines_of_code += 1
+        current_multi_line_comment = False
+        for line in line_list:
+            if current_multi_line_comment:
+                lines_of_code -= 1
+                lines_of_comment += 1
+            if re.findall("/\*|\*", line):
+                lines_of_code -= 0.5
+                lines_of_comment += 0.5
+                current_multi_line_comment = not current_multi_line_comment
+        return lines_of_comment / lines_of_code
 
 
 class Commit:
