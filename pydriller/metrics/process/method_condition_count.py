@@ -2,6 +2,7 @@ from pydriller import RepositoryMining
 from pydriller.domain.commit import ModificationType
 from pydriller.metrics.process.process_metric import ProcessMetric
 from pydriller.utils.DiffParser import get_changed_lines_between
+from pydriller.utils.MethodIterator import get_methods_reversed
 from pydriller.utils.NameGenerator import generate_method_long_name
 import re
 
@@ -24,29 +25,14 @@ class MethodConditionCount(ProcessMetric):
     def count(self):
         self.methods = {}
         renamed_files = {}
-
-        for commit in RepositoryMining(path_to_repo=self.path_to_repo,
-                                       from_commit=self.from_commit,
-                                       to_commit=self.to_commit,
-                                       reversed_order=True).traverse_commits():
-
-            for modified_file in commit.modifications:
-
-                file_path = renamed_files.get(modified_file.new_path, modified_file.new_path)
-
-                if modified_file.change_type == ModificationType.RENAME:
-                    renamed_files[modified_file.old_path] = file_path
-
-                file_name = file_path.split("/")[-1]
-
-                for method in modified_file.methods:
-                    method_long_name_with_file = generate_method_long_name(file_name, method.long_name)
-                    self.__handle_method(modified_file, method, method_long_name_with_file)
+        for method in get_methods_reversed(self.path_to_repo, self.from_commit, self.to_commit):
+            self.__handle_method(method.modified_file, method.method, method.method_long_name)
 
         return self.methods
 
-    def __handle_method(self, modified_file, method, method_long_name):
-        method_diff = get_changed_lines_between(modified_file.diff, method.start_line, method.end_line)
+    def __handle_method(self, method_dto):
+        method_diff = get_changed_lines_between(method_dto.modified_file.diff, method_dto.method.start_line,
+                                                method_dto.method.end_line)
         changed_conditions = []
         else_added = []
         else_removed = []
@@ -54,12 +40,12 @@ class MethodConditionCount(ProcessMetric):
             MethodConditionCount.__check_line(line, REGEX_CONDITION, changed_conditions)
             MethodConditionCount.__check_line(line, REGEX_ELSE_DELETE, else_removed)
             MethodConditionCount.__check_line(line, REGEX_ELSE_ADD, else_added)
-        previous_condition_changes = self.methods.get(method_long_name,
+        previous_condition_changes = self.methods.get(method_dto.method_long_name,
                                                       MethodConditionCount.__generate_empty_metrics())
         previous_condition_changes[COND_CHANGES] += len(changed_conditions)
         previous_condition_changes[ELSE_ADD] += len(else_added)
         previous_condition_changes[ELSE_DEL] += len(else_removed)
-        self.methods[method_long_name] = previous_condition_changes
+        self.methods[method_dto.method_long_name] = previous_condition_changes
 
     @staticmethod
     def __generate_empty_metrics():
