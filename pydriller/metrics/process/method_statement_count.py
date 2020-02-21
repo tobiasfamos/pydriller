@@ -63,9 +63,14 @@ class MethodStatementCount(ProcessMetric):
     @staticmethod
     def __add_averages(methods):
         for method in methods.values():
-            method[AVG_ADDED] = method[SUM_ADDED] / method[NUM_MODIFIED]
-            method[AVG_DELETED] = method[SUM_DELETED] / method[NUM_MODIFIED]
-            method[AVG_CHURN] = method[CHURN] / method[NUM_MODIFIED]
+            if method[NUM_MODIFIED] == 0:
+                method[AVG_ADDED] = 0
+                method[AVG_DELETED] = 0
+                method[AVG_CHURN] = 0
+            else:
+                method[AVG_ADDED] = method[SUM_ADDED] / method[NUM_MODIFIED]
+                method[AVG_DELETED] = method[SUM_DELETED] / method[NUM_MODIFIED]
+                method[AVG_CHURN] = method[CHURN] / method[NUM_MODIFIED]
         return methods
 
     @staticmethod
