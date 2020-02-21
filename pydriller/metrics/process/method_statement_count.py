@@ -1,6 +1,7 @@
 from pydriller.domain.commit import ModificationType
 from pydriller.repository_mining import RepositoryMining
 from pydriller.metrics.process.process_metric import ProcessMetric
+from pydriller.utils.MethodIterator import get_methods_reversed
 from pydriller.utils.NameGenerator import generate_method_long_name
 
 SUM_ADDED = "sum_statement_added"
@@ -17,30 +18,22 @@ MAX_CHURN = "max_churn"
 
 class MethodStatementCount(ProcessMetric):
 
+    def __init__(self, path_to_repo: str,
+                 from_commit: str,
+                 to_commit: str):
+        super().__init__(path_to_repo, from_commit, to_commit)
+        self.methods = {}
+
     def count(self):
-        methods = {}
-        renamed_files = {}
+        self.methods = {}
+        for method in get_methods_reversed(self.path_to_repo, self.from_commit, self.to_commit):
+            self.__handle_method(method)
+        return MethodStatementCount.__create_return_metrics(self.methods)
 
-        for commit in RepositoryMining(path_to_repo=self.path_to_repo,
-                                       from_commit=self.from_commit,
-                                       to_commit=self.to_commit,
-                                       reversed_order=True).traverse_commits():
-
-            for modified_file in commit.modifications:
-
-                file_path = renamed_files.get(modified_file.new_path, modified_file.new_path)
-
-                if modified_file.change_type == ModificationType.RENAME:
-                    renamed_files[modified_file.old_path] = file_path
-
-                file_name = file_path.split("/")[-1]
-
-                for method in modified_file.methods:
-                    method_name = generate_method_long_name(file_name, method.long_name)
-                    previous_added = methods.get(method_name, MethodStatementCount.__generate_empty_metrics())
-                    previous_added = MethodStatementCount.__update_metrics(previous_added, method)
-                    methods[method_name] = previous_added
-        return MethodStatementCount.__create_return_metrics(methods)
+    def __handle_method(self, method_dto):
+        previous_added = self.methods.get(method_dto.method_long_name, MethodStatementCount.__generate_empty_metrics())
+        previous_added = MethodStatementCount.__update_metrics(previous_added, method_dto.method)
+        self.methods[method_dto.method_long_name] = previous_added
 
     @staticmethod
     def __update_metrics(metrics, method):
@@ -61,6 +54,23 @@ class MethodStatementCount(ProcessMetric):
         return {SUM_ADDED: 0, MAX_ADDED: 0, NUM_MODIFIED: 0, SUM_DELETED: 0, MAX_DELETED: 0, MAX_CHURN: 0}
 
     @staticmethod
+    def __create_return_metrics(methods):
+        metrics = {}
+        for method_name in methods:
+            metrics[method_name] = {
+                SUM_ADDED: methods[method_name][SUM_ADDED],
+                MAX_ADDED: methods[method_name][MAX_ADDED],
+                SUM_DELETED: methods[method_name][SUM_DELETED],
+                MAX_DELETED: methods[method_name][MAX_DELETED],
+                NUM_MODIFIED: methods[method_name][NUM_MODIFIED],
+                MAX_CHURN: methods[method_name][MAX_CHURN]
+
+            }
+        metrics = MethodStatementCount.__add_absolutes(metrics)
+        metrics = MethodStatementCount.__add_averages(metrics)
+        return metrics
+
+    @staticmethod
     def __add_averages(methods):
         for method in methods.values():
             if method[NUM_MODIFIED] == 0:
@@ -78,20 +88,3 @@ class MethodStatementCount(ProcessMetric):
         for method in methods.values():
             method[CHURN] = method[SUM_ADDED] - method[SUM_DELETED]
         return methods
-
-    @staticmethod
-    def __create_return_metrics(methods):
-        metrics = {}
-        for method_name in methods:
-            metrics[method_name] = {
-                SUM_ADDED: methods[method_name][SUM_ADDED],
-                MAX_ADDED: methods[method_name][MAX_ADDED],
-                SUM_DELETED: methods[method_name][SUM_DELETED],
-                MAX_DELETED: methods[method_name][MAX_DELETED],
-                NUM_MODIFIED: methods[method_name][NUM_MODIFIED],
-                MAX_CHURN: methods[method_name][MAX_CHURN]
-
-            }
-        metrics = MethodStatementCount.__add_absolutes(metrics)
-        metrics = MethodStatementCount.__add_averages(metrics)
-        return metrics
