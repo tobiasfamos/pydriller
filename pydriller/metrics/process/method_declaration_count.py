@@ -2,50 +2,24 @@ from pydriller import RepositoryMining
 from pydriller.domain.commit import ModificationType
 from pydriller.metrics.process.process_metric import ProcessMetric
 from pydriller.utils.DiffParser import get_changed_lines_between
+from pydriller.utils.MethodIterator import get_methods_reversed
 from pydriller.utils.NameGenerator import generate_method_long_name
 
 
 class MethodDeclarationCount(ProcessMetric):
+    def __init__(self, path_to_repo: str,
+                 from_commit: str,
+                 to_commit: str):
+        super().__init__(path_to_repo, from_commit, to_commit)
+        self.methods = {}
+        # last seen decl line: MethodDS
 
     def count(self):
-        methods = {}
-        # last seen decl line: MethodDS
-        renamed_files = {}
-        renamed_methods = {}
+        self.methods = {}
+        for method in get_methods_reversed(self.path_to_repo, self.from_commit, self.to_commit):
+            self.__handle_method(method)
 
-        for commit in RepositoryMining(path_to_repo=self.path_to_repo,
-                                       from_commit=self.from_commit,
-                                       to_commit=self.to_commit,
-                                       reversed_order=True).traverse_commits():
-
-            for modified_file in commit.modifications:
-
-                file_path = renamed_files.get(modified_file.new_path, modified_file.new_path)
-
-                if modified_file.change_type == ModificationType.RENAME:
-                    renamed_files[modified_file.old_path] = file_path
-
-                file_name = file_path.split("/")[-1]
-
-                for method in modified_file.methods:
-                    add_line = ""
-                    del_line = ""
-                    declaration_lines = get_changed_lines_between(modified_file.diff, method.start_line,
-                                                                  method.start_line)
-                    if len(declaration_lines) == 0:
-                        continue
-                    for line in declaration_lines[:2]:
-                        if line[1][0] == "+":
-                            add_line = line[1]
-                        else:
-                            del_line = line[1]
-                    current_method_ds = methods.pop(add_line[1:], MethodDS(method, add_line,
-                                                                           generate_method_long_name(file_name,
-                                                                                                     method.long_name)))
-                    current_method_ds.change_decl(add_line, del_line)
-                    methods[current_method_ds.last_decl_line] = current_method_ds
-
-        return MethodDeclarationCount.__convert_return_value(methods)
+        return MethodDeclarationCount.__convert_return_value(self.methods)
 
     @staticmethod
     def __create_return_metrics(methods):
@@ -66,6 +40,23 @@ class MethodDeclarationCount(ProcessMetric):
         for method in methods.values():
             metrics[method.method_long_name] = method.decl_changes
         return metrics
+
+    def __handle_method(self, method_dto):
+        add_line = ""
+        del_line = ""
+        declaration_lines = get_changed_lines_between(method_dto.modified_file.diff, method_dto.method.start_line,
+                                                      method_dto.method.start_line)
+        if len(declaration_lines) == 0:
+            return
+        for line in declaration_lines[:2]:
+            if line[1][0] == "+":
+                add_line = line[1]
+            else:
+                del_line = line[1]
+        current_method_ds = self.methods.pop(add_line[1:], MethodDS(method_dto, add_line, method_dto.method_long_name))
+        current_method_ds.change_decl(add_line, del_line)
+        self.methods[current_method_ds.last_decl_line] = current_method_ds
+
 
 class MethodDS:
     def __init__(self, method, last_decl_line, method_long_name):
